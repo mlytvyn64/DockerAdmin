@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+  <div class="topbar">
+      <div class="logo">
+          <h1>Welcome to DAP</h1>
+      </div>
+      <div class="buttons">
+            <a href="">CREATE NEW</a>
+            <a href="">YOUR IMG</a>
+            <a href="">HISTORY</a>
+            <a href="">START ALL</a>
+       </div>
+
+
+  </div>
+    <table border="1">
+        <thead>
+          <tr>
+            <th>Number</th>
+            <th>Container Name</th>
+            <th>Container ID:Port</th>
+            <th>Connect</th>
+            <th>Show Logs</th>
+            <th>Start/Stop</th>
+            <th>Delete</th>
+          </tr>
+        </thead>
+        <tbody id="container-list">
+          <!-- Этот блок будет заполнен с помощью JavaScript -->
+        </tbody>
+      </table>
+      
+  <script>
+         function fillTableWithData(data) {
+            const containerList = document.getElementById('container-list');
+
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+
+                // Колонка с номером, который генерируется автоматически
+                const numberCell = document.createElement('td');
+                numberCell.textContent = index + 1;
+                row.appendChild(numberCell);
+
+                // Колонка с названием контейнера
+                const nameCell = document.createElement('td');
+                nameCell.textContent = item["Container Name"];
+                row.appendChild(nameCell);
+
+                // Колонка с ID и портом контейнера
+                const idPortCell = document.createElement('td');
+                idPortCell.textContent = item["Container ID:Port"];
+                row.appendChild(idPortCell);
+
+                containerList.appendChild(row);
+            });
+        }
+
+        // Вызов функции для заполнения таблицы данными из JSON
+        fillTableWithData(jsonData);
+      </script>
+</body>
+</html>
