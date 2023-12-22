@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Container Logs</title>
+</head>
+<body>
+    <div class="container">
+        <h1>Logs for Container {{ containerID }}</h1>
+        <pre id="logs"></pre>
+    </div>
+
+    <script>
+        function getLogs() {
+            const containerID = '{{ containerID }}';
+            fetch(`/getLogs?containerID=${containerID}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.logs) {
+                        document.getElementById('logs').textContent = data.logs;
+                    } else if (data.error) {
+                        document.getElementById('logs').textContent = `Error: ${data.error}`;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById('logs').textContent = `Error: ${error.message}`;
+                });
+        }
+
+        setInterval(getLogs, 5000);
+
+        document.addEventListener('DOMContentLoaded', getLogs);
+    </script>
+</body>
+</html>
