@@ -51,7 +51,7 @@ def dashboard():
 
 
 @app.route("/getContainers", methods=['GET'])
-def getContainers():
+def get_all_containers():
     try:
         if not session.get('logged_in'):
             return redirect(url_for('login'))
@@ -59,23 +59,21 @@ def getContainers():
         containers_info = []
 
         if docker_client.ping():
-            containers = docker_client.containers.list()
+            containers = docker_client.containers.list(all=True)
             for container in containers:
                 container_info = {
                     'id': container.id,
                     'name': container.name,
                     'status': container.status,
-                    'port': list(container.ports.keys())[0],
-                    #'connect': container.connect,
-                    #'logs': container.logs,
+                    'port': list(container.ports.keys())[0] if container.ports else "none",
                 }
                 containers_info.append(container_info)
-            responce = make_response(jsonify({'containers': containers_info}))
+            response = make_response(jsonify({'containers': containers_info}))
         else:
-            responce = make_response(jsonify({'error': 'No connection to Docker API'}))
-        responce.headers['Access-Control-Allow-Origin'] = '*'
-        responce.headers['Content-Type'] = 'json'
-        return responce
+            response = make_response(jsonify({'error': 'No connection to Docker API'}))
+        response.headers['Access-Control-Allow-Origin'] = '*'
+        response.headers['Content-Type'] = 'json'
+        return response
 
     except docker.errors.APIError as e:
         return jsonify({'error': f"Docker API error: {str(e)}"})
@@ -99,6 +97,32 @@ def logs():
     else:
         containerID = request.args.get('containerID')
         return render_template('logs.html', containerID=containerID)
+
+@app.route('/startStopContainer', methods=['GET'])
+def start_stop_container():
+    container_id = request.args.get('containerID')
+    try:
+        container = docker_client.containers.get(container_id)
+        if container.status == 'running':
+            container.stop()
+            return jsonify({'success': 'Container stopped'})
+        else:
+            container.start()
+            return jsonify({'success': 'Container started'})
+    except docker.errors.NotFound as e:
+        return jsonify({'error': f"Container with ID {container_id} not found."})
+    
+@app.route('/deleteContainer', methods=['DELETE'])
+def delete_container():
+    container_id = request.args.get('containerID')
+    try:
+        container = docker_client.containers.get(container_id)
+        container.remove(force=True)
+        return jsonify({'success': 'Container deleted successfully'})
+    except docker.errors.NotFound as e:
+        return jsonify({'error': f"Container with ID {container_id} not found."})
+    except docker.errors.APIError as e:
+        return jsonify({'error': f"Error deleting container: {str(e)}"})
 
 @app.route('/logout')
 def logout():
