@@ -75,7 +75,7 @@
     </div>
     <div class="buttons">
         <a href="#">CREATE NEW</a>
-        <a href="#">START ALL</a>
+        <a href="#" onclick="startAllContainers()">START ALL</a>
     </div>
 </div>
 <table>
@@ -83,7 +83,8 @@
         <tr>
             <th>Number</th>
             <th>Container Name</th>
-            <th>Container ID:Port</th>
+            <th>Container ID</th>
+            <th>Port</th>
             <th>Show Logs</th>
             <th>Start/Stop</th>
             <th>Delete</th>
@@ -111,9 +112,14 @@
                 nameCell.textContent = item["name"];
                 row.appendChild(nameCell);
 
-                const idPortCell = document.createElement('td');
-                idPortCell.textContent = item["id"] + ":" + item["port"];
-                row.appendChild(idPortCell);
+                const idCell = document.createElement('td');
+                const shortenedID = item["id"].slice(0, 5);
+                idCell.textContent = shortenedID;
+                row.appendChild(idCell);
+
+                const portCell = document.createElement('td');
+                portCell.textContent = item["port"] || "none";
+                row.appendChild(portCell);
 
                 const conectCell = document.createElement('td');
                 conectCell.textContent
@@ -207,6 +213,24 @@
                 console.error(error.message);
             });
         }
+        
+        function startAllContainers() {
+        fetch(`/startAllContainers`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("All stopped containers started successfully");
+                    // Оновлення списку контейнерів після запуску
+                    getContainerInfo();
+                } else if (data.error) {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+        }
+
       </script>
 </body>
 </html>

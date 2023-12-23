@@ -84,6 +84,9 @@ def get_all_containers():
 
 @app.route('/getLogs', methods=['GET'])
 def get_logs():
+    if not session.get('logged_in'):
+            return redirect(url_for('login'))
+
     container_id = request.args.get('containerID')
     
     try:
@@ -104,6 +107,9 @@ def logs():
 
 @app.route('/startStopContainer', methods=['GET'])
 def start_stop_container():
+    if not session.get('logged_in'):
+            return redirect(url_for('login'))
+    
     container_id = request.args.get('containerID')
     try:
         container = docker_client.containers.get(container_id)
@@ -118,6 +124,9 @@ def start_stop_container():
     
 @app.route('/deleteContainer', methods=['DELETE'])
 def delete_container():
+    if not session.get('logged_in'):
+            return redirect(url_for('login'))
+
     container_id = request.args.get('containerID')
     try:
         container = docker_client.containers.get(container_id)
@@ -127,6 +136,22 @@ def delete_container():
         return jsonify({'error': f"Container with ID {container_id} not found."})
     except docker.errors.APIError as e:
         return jsonify({'error': f"Error deleting container: {str(e)}"})
+    
+@app.route('/startAllContainers', methods=['GET'])
+def start_all_containers():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+
+    try:
+        stopped_containers = docker_client.containers.list(filters={'status': 'exited'})
+        for container in stopped_containers:
+            container.start()
+
+        return jsonify({'success': 'All stopped containers started'})
+    except docker.errors.APIError as e:
+        return jsonify({'error': f"Error starting containers: {str(e)}"})
+
+
 
 @app.route('/logout')
 def logout():
