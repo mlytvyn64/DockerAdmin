@@ -13,6 +13,10 @@ c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREM
 conn.commit()
 conn.close()
 
+@app.route('/index', methods=['GET'])
+def routeToDef():
+    return redirect('/')
+
 @app.route('/', methods=['GET'])
 def index():
     return render_template('login.html')
@@ -31,16 +35,16 @@ def login():
 
         if user:
             session['logged_in'] = True
-            return redirect('http://127.0.0.1:5001/dashboard')
+            return redirect(url_for('dashboard'))
         else:
             error_message = "Wrong login or password"
-            return redirect('http://127.0.0.1:5001/')
+            return redirect(url_for('index'))
             
 
     if not session.get('logged_in'):
-        return redirect('http://127.0.0.1:5001/')
+        return redirect(url_for('index'))
 
-    return redirect('http://127.0.0.1:5001/dashboard')
+    return redirect(url_for('dashboard'))
 
 @app.route('/dashboard')
 def dashboard():
@@ -93,7 +97,7 @@ def get_logs():
 @app.route('/logs.html')
 def logs():
     if not session.get('logged_in'):
-            return redirect(url_for('http://127.0.0.1:5001/'))
+            return redirect(url_for('index'))
     else:
         containerID = request.args.get('containerID')
         return render_template('logs.html', containerID=containerID)

@@ -13,7 +13,7 @@
           align-items: center;
           height: 100vh;
           margin: 0;
-          color: #FFFFFF;
+          color: #000;
       }
 
       .topbar {
@@ -62,6 +62,9 @@
       .buttons a:hover {
           background-color: #FFDD00;
           color: #FFF;
+      }
+      .buttons{
+        padding-bottom: 20px;
       }
   </style>
 </head>
@@ -160,7 +163,8 @@
                 console.log(this.responseText);
                 fillTableWithData(JSON.parse(this.responseText));
             }
-            xhttp.open("GET", "http://127.0.0.1:5001/getContainers");
+            const origin = window.location.origin;
+            xhttp.open("GET", origin + "/getContainers");
             xhttp.send();
         }
         window.setInterval(() => {
