@@ -66,6 +66,20 @@
       .buttons{
         padding-bottom: 20px;
       }
+
+      .status-indicator {
+        width: 60px;
+        height: 20px;
+        text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 3px;
+      }
+
+      .status-indicator span {
+          color: white;
+      }
   </style>
 </head>
 <body>
@@ -82,6 +96,7 @@
     <thead>
         <tr>
             <th>Number</th>
+            <th>Container Status</th>
             <th>Container Name</th>
             <th>Container ID</th>
             <th>Port</th>
@@ -107,6 +122,23 @@
                 const numberCell = document.createElement('td');
                 numberCell.textContent = index + 1;
                 row.appendChild(numberCell);
+
+                const statusCell = document.createElement('td');
+                const statusIndicator = document.createElement('div');
+                statusIndicator.classList.add('status-indicator');
+
+                const statusText = document.createElement('span');
+                statusText.textContent = item["status"];
+                statusIndicator.appendChild(statusText);
+
+                if (item["status"] === "running") {
+                    statusIndicator.style.backgroundColor = "green";
+                } else {
+                    statusIndicator.style.backgroundColor = "red";
+                }
+
+                statusCell.appendChild(statusIndicator);
+                row.appendChild(statusCell);
 
                 const nameCell = document.createElement('td');
                 nameCell.textContent = item["name"];
@@ -220,7 +252,6 @@
             .then(data => {
                 if (data.success) {
                     console.log("All stopped containers started successfully");
-                    // Оновлення списку контейнерів після запуску
                     getContainerInfo();
                 } else if (data.error) {
                     console.error(data.error);
