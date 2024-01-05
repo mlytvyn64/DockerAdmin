@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Container</title>
+</head>
+<body>
+    <h1>Create Container</h1>
+    <label for="containerName">Container Name:</label>
+    <input type="text" id="containerName"><br><br>
+    
+    <label for="containerPort">Container Port:</label>
+    <input type="text" id="containerPort"><br><br>
+
+    <label for="containerVolumes">Container Volumes (comma-separated):</label>
+    <input type="text" id="containerVolumes"><br><br>
+
+    <label for="containerEnvironment">Container Environment Variables (key=value pairs, comma-separated):</label>
+    <input type="text" id="containerEnvironment"><br><br>
+
+    <label for="dockerImages">Docker Images:</label>
+    <select id="dockerImages">
+
+    </select><br><br>
+
+    <button onclick="createContainer()">Create Container</button>
+
+    <script>
+        function createContainer() {
+            const name = document.getElementById('containerName').value;
+            const port = document.getElementById('containerPort').value;
+            const volumes = document.getElementById('containerVolumes').value.split(',');
+            const environment = document.getElementById('containerEnvironment').value.split(',');
+            const image = document.getElementById('dockerImages').value;
+
+            fetch('/createcontainer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    containerName: name,
+                    containerPort: port,
+                    containerVolumes: volumes,
+                    containerEnvironment: environment,
+                    imageName: image
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log("Container created successfully");
+                } else if (data.error) {
+                    console.error(data.error);
+                }
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+        }
+
+        fetch('/docker_images')
+            .then(response => response.json())
+            .then(data => {
+                const select = document.getElementById('dockerImages');
+                data.images.forEach(image => {
+                    const option = document.createElement('option');
+                    option.value = image;
+                    option.textContent = image;
+                    select.appendChild(option);
+                });
+            })
+            .catch(error => {
+                console.error(error.message);
+            });
+    </script>
+</body>
+</html>

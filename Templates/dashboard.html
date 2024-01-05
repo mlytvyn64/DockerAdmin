@@ -88,7 +88,7 @@
         <h1>Welcome to DAP</h1>
     </div>
     <div class="buttons">
-        <a href="#">CREATE NEW</a>
+        <a href="#" onclick="redirectToCreateContainer()">CREATE NEW</a>
         <a href="#" onclick="startAllContainers()">START ALL</a>
     </div>
 </div>
@@ -260,6 +260,10 @@
             .catch(error => {
                 console.error(error.message);
             });
+        }
+
+        function redirectToCreateContainer() {
+            window.location.href = '/createcontainer';
         }
 
       </script>
