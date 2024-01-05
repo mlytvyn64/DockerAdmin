@@ -3,13 +3,14 @@ import sqlite3
 import os
 import docker
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 app.secret_key = os.urandom(24)
 docker_client = docker.from_env()
+current_directory = os.getcwd()
 
 conn = sqlite3.connect('users.db')
-c = conn.cursor()
-c.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)''')
+curs = conn.cursor()
+curs.execute('''CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, password TEXT)''')
 conn.commit()
 conn.close()
 
@@ -150,7 +151,48 @@ def start_all_containers():
         return jsonify({'success': 'All stopped containers started'})
     except docker.errors.APIError as e:
         return jsonify({'error': f"Error starting containers: {str(e)}"})
+    
+@app.route('/createcontainer', methods=['GET'] )
+def rendercreate():
+    if not session.get('logged_in'):
+        return redirect(url_for('login'))
+    else:
+        return render_template('createcontainer.html')
 
+@app.route('/createcontainer', methods=['POST'])
+def create_container():
+    try:
+        data = request.get_json()
+        container_name = data.get('containerName') if data.get('containerName') != '' else None
+        container_port = {f"{data.get('containerPort')}/tcp": None} if data.get('containerPort') != '' else None
+        container_volumes = data.get('containerVolumes') if data.get('containerVolumes') != [''] else None
+        container_environment = data.get('containerEnvironment') if data.get('containerEnvironment') != [''] else None
+        image_name = data.get('imageName')
+
+        container = docker_client.containers.run(
+            image=image_name,
+            name=container_name,
+            ports=container_port,
+            volumes=container_volumes,
+            environment=container_environment,
+            detach=True
+        )
+
+        return jsonify({'success': 'Container created and started successfully'})
+    
+    except docker.errors.APIError as e:
+        return jsonify({'error': f"Error creating container: {str(e)}"})
+
+
+@app.route('/docker_images', methods=['GET'])
+def get_docker_images():
+    try:
+        images = docker_client.images.list()
+        image_list = [img.tags[0] for img in images if img.tags]
+        return jsonify({'images': image_list})
+    
+    except docker.errors.APIError as e:
+        return jsonify({'error': f"Error fetching Docker images: {str(e)}"})
 
 
 @app.route('/logout')
